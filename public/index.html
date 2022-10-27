@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./vue.global.js"></script>
+
+</head>
+
+<body>
+    <div class="app" style="padding: 10px;">
+        <div style="margin-bottom: 10px;color:green">当前播放: {{currentName}}</div>
+        <!-- <audio :src="src" id="audio" autoplay></audio> -->
+        <audio controls :key="current" autoplay>
+            <source :src="current" type="audio/mpeg">
+            您的浏览器不支持该音频格式。
+        </audio>
+        <div style="margin-top: 10px;" >
+            <div style="margin-bottom: 10px;">待播放的音乐:</div>
+            <textarea style="display:none"   name="" id="" cols="30" rows="25" v-model="fileStr"></textarea>
+
+            <textarea  style="width: 60vw"  name="" id="" cols="30" rows="25" v-model="waitStr"></textarea>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue
+        let audio
+        createApp({
+            data() {
+                return {
+                    fileUrls: [],
+                    fileStr: '',
+                    current: '',
+                    isPlaying: false,
+                }
+            },
+            computed: {
+                waitStr(){
+                    return this.fileStr.split('\n').slice(1).join('\n')
+                },
+                currentName(){
+                    return this.current&&this.current.split('/').slice(-1)[0]
+                }
+            },
+            watch: {
+                fileStr: {
+                    handler(val) {
+                        console.log('change', val)
+                        val && this.getFileUrl(val)
+                    },
+                    immediate: true
+                }
+            },
+            methods: {
+                getFileUrl(str) {
+                    let arr = str.split('\n')
+                    this.fileUrls = arr.map(one => 'http://localhost:8181/song/' + one)
+                    console.log(this.fileUrls)
+                    if (!this.current) {
+                        this.playFirst()
+                    }
+                },
+                playFirst() {
+                    this.current = this.fileUrls[0]
+                    console.log(this.current)
+                    sendTextNode('canPlay', 1)
+                    this.$nextTick(() => {
+                        audio = document.querySelector('audio')
+                        audio.onended = this.handleEnd
+                    })
+                },
+
+                handleEnd() {
+                    sendTextNode('end', this.fileUrls.shift())
+                    this.current = ''
+                    // this.current = this.fileUrls[0]
+                },
+
+                play() {
+                    audio.play()
+                    this.isPlaying = true
+                },
+                pause() {
+                    audio.pause()
+                    this.isPlaying = false
+                }
+
+            },
+            mounted() {
+
+                // audio.addEventListener('ended', )
+                // audio.onpause
+            },
+        }).mount('.app')
+    </script>
+</body>
+
+</html>

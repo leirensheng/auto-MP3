@@ -1,0 +1,37 @@
+{
+  "name": "auto-mp3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/main.js",
+  "bin": "./src/main.js",
+  "scripts": {
+    "pkg": "pkg .  --out-path=dist/",
+    "start": "node ./src/main"
+  },
+  "pkg": {
+    "targets": [
+      "node12-win-x64"
+    ],
+    "assets": [
+      "public/*/*",
+      "public/*"
+    ],
+    "scripts": [
+      "./node_modules/carlo/lib/find_chrome.js"
+    ]
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "carlo": "^0.9.46",
+    "chalk": "^4.1.0",
+    "pkg": "^4.4.9",
+    "puppeteer-core": "^14.1.1",
+    "shelljs": "^0.8.5"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}
