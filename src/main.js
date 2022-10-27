@@ -25,12 +25,12 @@ class Main {
 
   getFiles() {
     let fileInfo = fs
-      .readdirSync(path.resolve(__dirname, "../public/song"))
+      .readdirSync(this.info.filePath)
       .filter((one) => one.includes("mp3"))
       .map((one) => ({
         name: one,
-        createTime: fs.statSync(path.resolve(__dirname, "../public/song", one))
-          .ctimeMs,
+        createTime: fs.statSync(path.resolve(this.info.filePath, one))
+          .birthtimeMs          
       }))
       .sort((a, b) => a.createTime - b.createTime);
 
@@ -43,7 +43,7 @@ class Main {
     if (hasDone.length > this.info.maxLength) {
       let fileToRemove = this.info.hasDone.shift();
       console.log("开始删除文件", fileToRemove);
-      fs.unlinkSync(path.resolve(__dirname, "../public/song", fileToRemove));
+      fs.unlinkSync(path.resolve(this.info.filePath, fileToRemove));
       console.log("删除成功");
       this.updateJson();
     }
@@ -70,7 +70,7 @@ class Main {
     return new Promise((resolve) => {
       startBrowser(async (page) => {
         this.page = page;
-        await page.goto(`localhost:8181`);
+        await page.goto(`http://localhost:8181`);
         await page.exposeFunction("sendTextNode", (type, val) => {
           // console.log("接收到页面的信息", type, val);
           if (type === "canPlay") {
@@ -88,8 +88,22 @@ class Main {
       host: "0.0.0.0",
       root: path.resolve(process.cwd(), "./public"),
       open: false,
-      ignorePattern: /song/,
       file: "index.html",
+      logLevel: 2,
+      middleware: [
+        function (req, res, next) {
+          next();
+        },
+      ],
+    };
+    liveServer.start(params);
+  }
+  startFileServer() {
+    var params = {
+      port: 8182,
+      host: "0.0.0.0",
+      root: this.info.filePath,
+      open: false,
       logLevel: 2,
       middleware: [
         function (req, res, next) {
@@ -101,11 +115,12 @@ class Main {
   }
   watchFileChange() {
     fs.watch(
-      path.resolve(process.cwd(), "./public/song"),
+      this.info.filePath,
       {
         recursive: false,
       },
       (eventType, filename) => {
+        console.log("文件变化")
         this.getFiles();
       }
     );
@@ -114,9 +129,10 @@ class Main {
 
 (async () => {
   try {
-	await checkPort(8181)
+	// await checkPort(818;1)
     let obj = new Main();
     obj.startHtmlServer();
+    obj.startFileServer()
     await obj.openBrowser();
     obj.watchFileChange();
     obj.getFiles();
