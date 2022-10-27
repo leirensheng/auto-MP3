@@ -12,9 +12,15 @@ class Main {
     this.getInfoJson();
   }
   getInfoJson() {
+    let oldFile = fs.readFileSync(path.resolve(process.cwd(), './filePath'),'utf-8')
+    console.log('原始:',oldFile)
+
+    
     this.info = JSON.parse(
       fs.readFileSync(path.resolve(process.cwd(), "./info.json"), "utf-8")
     );
+    this.info.filePath = oldFile.replace('\\','/')
+    console.log(this.info.filePath)
   }
   updateJson() {
     fs.writeFileSync(
@@ -131,12 +137,13 @@ class Main {
   try {
 	// await checkPort(818;1)
     let obj = new Main();
-    obj.startHtmlServer();
     obj.startFileServer()
+    obj.startHtmlServer();
     await obj.openBrowser();
     obj.watchFileChange();
     obj.getFiles();
   } catch (e) {
     console.log(e);
   }
+  // await sleep(10000)
 })();
