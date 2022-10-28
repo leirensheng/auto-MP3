@@ -1,5 +1,5 @@
 let startBrowser = require("./startBrowser");
-const { sleep,checkPort } = require("./utils");
+const { sleep, checkPort } = require("./utils");
 const path = require("path");
 let fs = require("fs");
 var liveServer = require("live-server");
@@ -12,15 +12,17 @@ class Main {
     this.getInfoJson();
   }
   getInfoJson() {
-    let oldFile = fs.readFileSync(path.resolve(process.cwd(), './filePath'),'utf-8')
-    console.log('原始:',oldFile)
+    let oldFile = fs.readFileSync(
+      path.resolve(process.cwd(), "./filePath"),
+      "utf-8"
+    );
+    console.log("原始:", oldFile);
 
-    
     this.info = JSON.parse(
       fs.readFileSync(path.resolve(process.cwd(), "./info.json"), "utf-8")
     );
-    this.info.filePath = oldFile.replace('\\','/')
-    console.log(this.info.filePath)
+    this.info.filePath = oldFile.replace("\\", "/");
+    console.log(this.info.filePath);
   }
   updateJson() {
     fs.writeFileSync(
@@ -35,11 +37,10 @@ class Main {
       .filter((one) => one.includes("mp3"))
       .map((one) => ({
         name: one,
-        createTime: fs.statSync(path.resolve(this.info.filePath, one))
-          .birthtimeMs          
+        stat: fs.statSync(path.resolve(this.info.filePath, one)),
       }))
-      .sort((a, b) => a.createTime - b.createTime);
-
+      .filter((one) => one.stat.size > 1024)
+      .sort((a, b) => a.stat.createTime - b.stat.createTime);
     this.files = fileInfo.map((one) => one.name);
 
     this.refreshPageSong();
@@ -126,7 +127,7 @@ class Main {
         recursive: false,
       },
       (eventType, filename) => {
-        console.log("文件变化")
+        console.log("文件变化");
         this.getFiles();
       }
     );
@@ -135,13 +136,13 @@ class Main {
 
 (async () => {
   try {
-	// await checkPort(818;1)
+    // await checkPort(818;1)
     let obj = new Main();
-    obj.startFileServer()
+    console.log("开始等待", obj.info.waitTime + "s");
+    await sleep(obj.info.waitTime * 1000);
+    console.log("开始执行");
+    obj.startFileServer();
     obj.startHtmlServer();
-    console.log("开始等待",obj.info.waitTime+"s")
-    await sleep(obj.info.waitTime*1000)
-    console.log("开始执行")
     await obj.openBrowser();
     obj.watchFileChange();
     obj.getFiles();
