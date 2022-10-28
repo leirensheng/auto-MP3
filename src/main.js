@@ -139,6 +139,9 @@ class Main {
     let obj = new Main();
     obj.startFileServer()
     obj.startHtmlServer();
+    console.log("开始等待",obj.info.waitTime+"s")
+    await sleep(obj.info.waitTime*1000)
+    console.log("开始执行")
     await obj.openBrowser();
     obj.watchFileChange();
     obj.getFiles();
