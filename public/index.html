@@ -17,11 +17,11 @@
             <source :src="current" type="audio/mpeg">
             您的浏览器不支持该音频格式。
         </audio>
-        <div style="margin-top: 10px;" >
+        <div style="margin-top: 10px;">
             <div style="margin-bottom: 10px;">待播放的音乐:</div>
-            <textarea style="display:none"   name="" id="" cols="30" rows="25" v-model="fileStr"></textarea>
+            <textarea style="display:none" name="" id="" cols="30" rows="25" v-model="fileStr"></textarea>
 
-            <textarea  style="width: 60vw"  name="" id="" cols="30" rows="25" v-model="waitStr"></textarea>
+            <textarea style="width: 60vw" name="" id="" cols="30" rows="25" v-model="waitStr"></textarea>
         </div>
     </div>
 
@@ -38,11 +38,11 @@
                 }
             },
             computed: {
-                waitStr(){
+                waitStr() {
                     return this.fileStr.split('\n').slice(1).join('\n')
                 },
-                currentName(){
-                    return this.current&&this.current.split('/').slice(-1)[0]
+                currentName() {
+                    return this.current && this.current.split('/').slice(-1)[0]
                 }
             },
             watch: {
@@ -69,7 +69,13 @@
                     sendTextNode('canPlay', 1)
                     this.$nextTick(() => {
                         audio = document.querySelector('audio')
+                        
                         audio.onended = this.handleEnd
+                        setTimeout(() => {
+                            if(audio.paused){
+                                this.handleEnd()
+                            }
+                        }, 1000);
                     })
                 },
 
@@ -78,7 +84,7 @@
                     this.current = ''
                 },
             },
-            mounted() {},
+            mounted() { },
         }).mount('.app')
     </script>
 </body>
